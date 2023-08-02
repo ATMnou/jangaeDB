@@ -1,4 +1,13 @@
-const axios = require("axios");
+const mysql = require("mysql2");
+const config = require("./config.json");
+
+let connection = mysql.createConnection({
+  host: config.SQL_HOST,
+  user: config.SQL_USER,
+  password: config.SQL_PW,
+  database: config.SQL_DB,
+});
+connection.connect();
 const {
   Client,
   Interaction,
@@ -8,8 +17,6 @@ const {
   EmbedBuilder,
   PermissionsBitField,
 } = require("discord.js");
-const config = require("./config.json");
-const json = "http://210.117.212.41:4000/jangae";
 const client = new Client({
   intents: [
     GatewayIntentBits.Guilds,
@@ -25,6 +32,16 @@ function isAdmin(msg) {
   return msg.member.permissionsIn(msg.channel).has("ADMINISTRATOR");
 }
 
+async function getdata() {
+  connection.query("SELECT * FROM jangae", function (err, results, fields) {
+    if (err) {
+      console.log(err);
+    }
+    for (let i = 0; i < results.length; i++) {
+      data.push(results[i].discord_id);
+    }
+  });
+}
 async function ban(user, guild, msg) {
   const exampleEmbed = new EmbedBuilder()
     .setColor(0x0099ff)
@@ -66,7 +83,12 @@ async function ban(user, guild, msg) {
 client.on("ready", () => {
   console.log(`봇 켜짐 : ${client.user.tag}!`);
   client.user.setPresence({
-    activities: [{ name: `건국대학교 만세`, type: ActivityType.Playing }],
+    activities: [
+      {
+        name: `${client.guilds.cache.size}개 서버에서 장애당 처치하는 중`,
+        type: ActivityType.Playing,
+      },
+    ],
     status: "online",
   });
   getdata();
@@ -76,13 +98,6 @@ process.on("uncaughtException", (err) => {
   console.log("General error:", err.message);
   console.log(err);
 });
-
-async function getdata() {
-  const res = await axios.get(json);
-  for (let i = 0; i < res.data.length; i++) {
-    data.push(res.data[i].target_id);
-  }
-}
 
 client.on("guildMemberAdd", async (member) => {
   if (
@@ -98,18 +113,15 @@ client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
   if (message.channel.id == "1135798027400007711") {
     if (!data.includes(message.content)) {
-      axios
-        .post(json, {
-          target_id: message.content,
-          author:
-            message.author.id == "183299738823688192"
-              ? "ADMIN"
-              : message.author.id,
-        })
-        .then(() => {
-          message.react("✅");
-          getdata();
-        });
+      connection.connect();
+      const query = `INSERT INTO jangae (target_id, author) VALUES`;
+      const values = [[message.content, message.author.id]];
+      connection.query(query, [values], function (err, results, fields) {
+        if (err) {
+          console.log(err);
+        }
+        message.react("✅");
+      });
     } else {
       message.react("❌");
     }
