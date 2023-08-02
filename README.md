@@ -1,6 +1,6 @@
 <img src="./icon.png" width="300px" height="300px" title="jangaeDB"/>
-<br/>
 # ㅉ
+<br/>
 # jangaeDB (장애DB)
 
 디스코드 최초 장애당 인원 차단 봇
