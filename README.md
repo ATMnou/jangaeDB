@@ -22,6 +22,8 @@
 <ul>
 <li><a href="https://nodejs.org/ko" target="_blank">Node.js</a> 18 이상 권장</li>
 <li><a href="https://yarnpkg.com/getting-started/install" target="_blank">Yarn</a></li>
+<li><a href="https://dev.mysql.com/downloads/" target="_blank">MySQL</a></li>
+
 <li>프로그래밍에 대한 기초적인 지식이 있는 대가리</li>
 </ul>
 
@@ -39,6 +41,12 @@ yarn
 
 ```json
 {
-  "token": "(니네 봇 토큰)"
+  "token": "(니네 봇 토큰)",
+  "SQL_HOST": "(MySQL 호스트)",
+  "SQL_USER": "(MySQL 유저)",
+  "SQL_PW": "(MySQL 비밀번호)",
+  "SQL_DB": "(MySQL 데이터베이스 이름)"
 }
 ```
+
+5. MySQL 데이터베이스는 알아서 생성해주세요.
