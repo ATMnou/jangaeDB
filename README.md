@@ -1,11 +1,14 @@
 <img src="./icon.png" width="300px" height="300px" title="jangaeDB"/>
 <br/>
+# jangaeDB (장애DB)
+
+디스코드 최초 장애당 인원 차단 봇
+
 ```
 이 프로젝트에서 사용하는 '장애'는 실제 장애인을 의미하는 것이 절대로 아닙니다.
 로블록스의 '장애당'을 의미하는 고유명사임을 알려 드립니다.
 ```
-# jangaeDB (장애DB)
-디스코드 최초 장애당 인원 차단 봇
+
 # 왜 장애당을 차단해야 하나요?
 
 이 <a href="https://docs.google.com/document/d/1k1xYTbQ4CUO6p1TLF1QqKTiED75GJv1BldChjbwZDNQ/edit">구글 문서</a>를 읽는 것을 권장합니다.
