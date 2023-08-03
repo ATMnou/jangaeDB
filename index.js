@@ -27,16 +27,32 @@ const client = new Client({
   ],
 });
 let data = [];
+const commandCooldowns = new Set();
 
 function isAdmin(msg) {
   return msg.member.permissionsIn(msg.channel).has("ADMINISTRATOR");
 }
 
+setInterval(dosomething, 30 * 1000);
+
+function dosomething() {
+  getdata();
+  client.user.setPresence({
+    activities: [
+      {
+        name: `${client.guilds.cache.size}개 서버에서 장애당 처치하는 중 | 데이터 개수 : ${data.length}개`,
+        type: ActivityType.Playing,
+      },
+    ],
+    status: "online",
+  });
+}
 async function getdata() {
   connection.query("SELECT * FROM jangae", function (err, results, fields) {
     if (err) {
       console.log(err);
     }
+    data = [];
     for (let i = 0; i < results.length; i++) {
       data.push(results[i].discord_id);
     }
@@ -82,15 +98,7 @@ async function ban(user, guild, msg) {
 
 client.on("ready", () => {
   console.log(`봇 켜짐 : ${client.user.tag}!`);
-  client.user.setPresence({
-    activities: [
-      {
-        name: `${client.guilds.cache.size}개 서버에서 장애당 처치하는 중`,
-        type: ActivityType.Playing,
-      },
-    ],
-    status: "online",
-  });
+
   getdata();
 });
 
@@ -114,41 +122,57 @@ client.on("messageCreate", async (message) => {
   if (message.channel.id == "1135798027400007711") {
     if (!data.includes(message.content)) {
       connection.connect();
-      const query = `INSERT INTO jangae (target_id, author) VALUES`;
+      const query = `INSERT INTO jangae () VALUES ?`;
       const values = [[message.content, message.author.id]];
       connection.query(query, [values], function (err, results, fields) {
         if (err) {
           console.log(err);
+          message.react("🐞");
+        } else {
+          message.react("✅");
         }
-        message.react("✅");
       });
     } else {
       message.react("❌");
     }
   }
   if (message.content == "!스캔") {
-    if (message.author.id == "183299738823688192") {
-      let count = 0;
-      getdata();
-      const guild = message.guild;
-      guild.members
-        .fetch()
-        .then((fetchedMembers) => {
-          const keys = Array.from(fetchedMembers.keys());
-          for (let i = 0; i < keys.length; i++) {
-            if (data.includes(keys[i])) {
-              ban(fetchedMembers.get(keys[i]), guild, message);
-              count++;
+    const targetUser = await message.guild.members.fetch(message.author.id);
+    if (
+      targetUser.permissions.has(PermissionsBitField.Flags.BanMembers) ||
+      message.author.id == "183299738823688192"
+    ) {
+      if (commandCooldowns.has(message.guildId)) {
+        message.reply("과부하 방지를 위해 10초에 한번만 사용할 수 있습니다.");
+      } else {
+        commandCooldowns.add(message.guildId);
+        setTimeout(() => {
+          commandCooldowns.delete(message.guildId);
+        }, 10000);
+        let count = 0;
+        getdata();
+        const guild = message.guild;
+        guild.members
+          .fetch()
+          .then((fetchedMembers) => {
+            const keys = Array.from(fetchedMembers.keys());
+            for (let i = 0; i < keys.length; i++) {
+              if (data.includes(keys[i])) {
+                ban(fetchedMembers.get(keys[i]), guild, message);
+                count++;
+              }
             }
-          }
-        })
-        .then(() => {
-          if (count == 0) {
-            message.reply("스캔 완료. 밴할 사람 없음");
-          } else {
-            message.reply("스캔 완료. " + count + "명 밴 시작");
-          }
-        });
+          })
+          .then(() => {
+            if (count == 0) {
+              message.reply("스캔 완료. 밴할 사람 없음");
+            } else {
+              message.reply("스캔 완료. " + count + "명 밴 시작");
+            }
+          });
+      }
+    } else {
+      message.reply("권한이 없습니다.");
     }
   }
 });
