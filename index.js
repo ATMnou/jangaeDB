@@ -1,5 +1,6 @@
 const mysql = require("mysql2");
 const config = require("./config.json");
+const fs = require("fs");
 
 let connection = mysql.createConnection({
   host: config.SQL_HOST,
@@ -7,6 +8,7 @@ let connection = mysql.createConnection({
   password: config.SQL_PW,
   database: config.SQL_DB,
 });
+let banned = 0;
 connection.connect();
 const {
   Client,
@@ -33,14 +35,23 @@ function isAdmin(msg) {
   return msg.member.permissionsIn(msg.channel).has("ADMINISTRATOR");
 }
 
+function readjson() {
+  fs.readFile("db.json", "utf8", (err, jsonData) => {
+    if (err) throw err;
+    const data = JSON.parse(jsonData);
+    banned = data.count;
+  });
+}
+
 setInterval(dosomething, 30 * 1000);
 
 function dosomething() {
   getdata();
+  readjson();
   client.user.setPresence({
     activities: [
       {
-        name: `${client.guilds.cache.size}개 서버에서 장애당 처치하는 중 | 데이터 개수 : ${data.length}개`,
+        name: `${client.guilds.cache.size}개 서버에서 장애당 ${banned}마리 처치함 | 데이터 개수 : ${data.length}개`,
         type: ActivityType.Playing,
       },
     ],
@@ -83,10 +94,21 @@ async function ban(user, guild, msg) {
   if (typeof user == "string") {
     targetUser = await guild.members.fetch(user);
   }
-  reason = "jangaeDB : 자동 밴";
+  let reason = "jangaeDB : 자동 밴";
   targetUser.send({ embeds: [exampleEmbed] }).then(async () => {
     try {
       await targetUser.ban({ reason });
+      banned++;
+      fs.readFile("db.json", "utf8", (err, jsonData) => {
+        if (err) throw err;
+        const data = JSON.parse(jsonData);
+        data.count++;
+
+        const updatedJsonData = JSON.stringify(data, null, 2);
+        fs.writeFile("db.json", updatedJsonData, (err) => {
+          if (err) throw err;
+        });
+      });
       if (msg) {
         msg.reply(targetUser.user.username + "님을 밴했습니다.");
       }

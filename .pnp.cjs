@@ -30,6 +30,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "packageDependencies": [\
             ["axios", "npm:1.4.0"],\
             ["discord.js", "npm:14.12.1"],\
+            ["fs", "npm:0.0.1-security"],\
             ["json-server", "npm:0.17.3"],\
             ["mysql2", "npm:3.5.2"]\
           ],\
@@ -1811,6 +1812,15 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
           "linkType": "HARD"\
         }]\
       ]],\
+      ["fs", [\
+        ["npm:0.0.1-security", {\
+          "packageLocation": "./.yarn/cache/fs-npm-0.0.1-security-5060b47e87-53c6230e1f.zip/node_modules/fs/",\
+          "packageDependencies": [\
+            ["fs", "npm:0.0.1-security"]\
+          ],\
+          "linkType": "HARD"\
+        }]\
+      ]],\
       ["fs.realpath", [\
         ["npm:1.0.0", {\
           "packageLocation": "./.yarn/cache/fs.realpath-npm-1.0.0-c8f05d8126-99ddea01a7.zip/node_modules/fs.realpath/",\
@@ -2382,6 +2392,7 @@ function $$SETUP_STATE(hydrateRuntimeState, basePath) {
             ["jangaedb", "workspace:."],\
             ["axios", "npm:1.4.0"],\
             ["discord.js", "npm:14.12.1"],\
+            ["fs", "npm:0.0.1-security"],\
             ["json-server", "npm:0.17.3"],\
             ["mysql2", "npm:3.5.2"]\
           ],\
