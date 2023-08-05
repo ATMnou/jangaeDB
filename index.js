@@ -69,8 +69,9 @@ async function getdata() {
     }
   });
 }
-async function ban(user, guild, msg) {
-  const exampleEmbed = new EmbedBuilder()
+
+function getBanMessage(guild) {
+  return new EmbedBuilder()
     .setColor(0x0099ff)
     .setTitle("jangaeDB : 자동 밴")
     .setURL("https://discord.gg/4nfgsZ9ckQ")
@@ -90,15 +91,18 @@ async function ban(user, guild, msg) {
         "https://media.discordapp.net/attachments/1136111904432066610/1136111970098090034/Untitled512.png",
     })
     .setTimestamp();
-  let targetUser = user;
-  if (typeof user == "string") {
-    targetUser = await guild.members.fetch(user);
-  }
-  let reason = "jangaeDB : 자동 밴";
-  targetUser.send({ embeds: [exampleEmbed] }).then(async () => {
+}
+async function ban(userId, guild, msg) {
+  const BanMessage = getBanMessage(guild);
+  const targetUser = await guild.members.fetch(userId);
+
+  targetUser.send({ embeds: [BanMessage] }).then(async () => {
     try {
-      await targetUser.ban({ reason });
+      await targetUser.ban({ reason: "jangaeDB : 자동 밴" });
+
       banned++;
+
+      // db.json에 벤 된 인원 수 저장함
       fs.readFile("db.json", "utf8", (err, jsonData) => {
         if (err) throw err;
         const data = JSON.parse(jsonData);
@@ -119,7 +123,7 @@ async function ban(user, guild, msg) {
 }
 
 client.on("ready", () => {
-  console.log(`봇 켜짐 : ${client.user.tag}!`);
+  console.log(`장애봇 온라인!`);
 
   getdata();
 });
@@ -134,10 +138,16 @@ client.on("guildMemberAdd", async (member) => {
     data.includes(member.user.id) &&
     member.guild.id != "1135788320681623562"
   ) {
-    // console.log(typeof member);
     ban(member.user.id, member.guild, null);
   }
 });
+
+const startCooldown = (guildId) => {
+  commandCooldowns.add(message.guildId);
+  setTimeout(() => {
+    commandCooldowns.delete(message.guildId);
+  }, 10000);
+};
 
 client.on("messageCreate", async (message) => {
   if (message.author.bot) return;
@@ -160,41 +170,43 @@ client.on("messageCreate", async (message) => {
   }
   if (message.content == "!스캔") {
     const targetUser = await message.guild.members.fetch(message.author.id);
+    const guild = message.guild;
+    const guildId = message.guildId;
+
+    let count = 0;
+
     if (
-      targetUser.permissions.has(PermissionsBitField.Flags.BanMembers) ||
-      message.author.id == "183299738823688192"
+      !targetUser.permissions.has(PermissionsBitField.Flags.BanMembers) ||
+      message.author.id !== "183299738823688192"
     ) {
-      if (commandCooldowns.has(message.guildId)) {
-        message.reply("과부하 방지를 위해 10초에 한번만 사용할 수 있습니다.");
-      } else {
-        commandCooldowns.add(message.guildId);
-        setTimeout(() => {
-          commandCooldowns.delete(message.guildId);
-        }, 10000);
-        let count = 0;
-        getdata();
-        const guild = message.guild;
-        guild.members
-          .fetch()
-          .then((fetchedMembers) => {
-            const keys = Array.from(fetchedMembers.keys());
-            for (let i = 0; i < keys.length; i++) {
-              if (data.includes(keys[i])) {
-                ban(fetchedMembers.get(keys[i]), guild, message);
-                count++;
-              }
-            }
-          })
-          .then(() => {
-            if (count == 0) {
-              message.reply("스캔 완료. 밴할 사람 없음");
-            } else {
-              message.reply("스캔 완료. " + count + "명 밴 시작");
-            }
-          });
-      }
-    } else {
       message.reply("권한이 없습니다.");
+      return;
+    }
+
+    if (commandCooldowns.has(guildId)) {
+      message.reply("과부하 방지를 위해 10초에 한번만 사용할 수 있습니다.");
+      return;
+    }
+
+    startCooldown(guildId);
+    getdata();
+
+    const fetchedMembers = await guild.members.fetch();
+
+    // fetching members
+    const keys = Array.from(fetchedMembers.keys());
+
+    keys.forEach((key) => {
+      if (data.includes(key)) {
+        ban(fetchedMembers.get(key), guild, message);
+        count++;
+      }
+    });
+
+    if (count == 0) {
+      message.reply("스캔 완료. 밴할 사람 없음");
+    } else {
+      message.reply("스캔 완료. " + count + "명 밴 시작");
     }
   }
 });
