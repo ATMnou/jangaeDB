@@ -1,6 +1,6 @@
 <img src="./icon.png" width="300px" height="300px" title="jangaeDB"/>
 <br/>
-# jangaeDB (장애DB)
+# EschatonDB (에스카톤DB)
 
 디스코드 최초 장애당 인원 차단 봇
 
@@ -8,6 +8,12 @@
 이 프로젝트에서 사용하는 '장애'는 실제 장애인을 의미하는 것이 절대로 아닙니다.
 로블록스의 '장애당'을 의미하는 고유명사임을 알려 드립니다.
 ```
+
+# 초대 및 사용법
+
+1. <a href="https://discord.com/oauth2/authorize?client_id=1135753667501367459&permissions=8&scope=bot">초대 링크</a>로 봇을 초대합니다.
+2. 봇의 고유한 역할을 가장 위로 올리던 이미 있는 봇 역할을 주던 해서 권한을 높입니다.
+3. 끝
 
 # 왜 장애당을 차단해야 하나요?
 
